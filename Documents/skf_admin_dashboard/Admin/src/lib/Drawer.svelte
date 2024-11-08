@@ -45,7 +45,8 @@
                 <li>
                     <button
                         class="flex items-center text-lg text-black text-left rounded-lg hover:text-white hover:bg-blue-400 duration-300 py-4 px-5 font-semibold w-full"
-                    >
+                        on:click={() => goto("/settings")}
+                        >
                         <i class="fa-solid fa-cog mr-3"></i> Settings
                     </button>
                 </li>

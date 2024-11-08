@@ -18,7 +18,7 @@ const PerformLogin = async () => {
     try {
         const response = await fetch("https://skfplc.vsensetech.in/login/admin", { 
             method: "POST",
-            credentials: "include",
+            
             body: JSON.stringify({ email, password }),
         });
 

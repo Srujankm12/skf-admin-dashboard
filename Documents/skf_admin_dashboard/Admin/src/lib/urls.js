@@ -11,18 +11,18 @@ export let deleteuser = url + "/admin/delete/user/__USER_ID__"
 export let getusers = url + "/admin/users"
 
 //plc
-export let createplc = url + "/admin/create/plc/__USER_ID__"
+export let createplc = url + "/admin/create/plc/"
 export let deleteplc = url + "/admin/delete/plc/__PLC_ID__"
-export let getplc = url + "/admin/plcs/__USER_ID__"
+export let getplc = url + "/admin/plcs/"
 //drier
-export let createdrier = url + "/admin/create/drier/__PLC_ID__"
+export let createdrier = url + "/admin/create/drier/"
 export let deletedrier = url + "/admin/delete/drier/__PLC_ID__/__DRIER_ID__"
-export let getdriers = url + "/admin/driers/__PLC_ID__"
+export let getdriers = url + "/admin/driers/"
 
 //register
-export let createregister = url + "/admin/create/register/__PLC_ID__/__DRIER_ID__"
+export let createregister = url + "/admin/create/register/"
 export let deleteregister = url + "/admin/delete/register/__PLC_ID__/__DRIER_ID__/__REG_ADDRESS__/__REG_TYPE__"
-export let getregisters = url + "/admin/registers/__PLC_ID__/__DRIER_ID__"
+export let getregisters = url + "/admin/registers/"
 export let createregistertype = url + "/admin/create/register_type"
 export let deleteregistertype = url + "/admin/delete/register_type/__REGISTER_TYPE__"
 

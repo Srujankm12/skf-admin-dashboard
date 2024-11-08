@@ -26,16 +26,17 @@
     const fetchplc = async () =>{
         isLoading =true;
         try {
-            const response = await fetch(getplc,{
+            const response = await fetch(getplc + data.listofplcs,{
                 method:"GET",
-                credentials: "include",
-                body:JSON.stringify({user_id:data.listofplcs})
+               //credentials: "include",
+               //body:JSON.stringify({user_id:data.listofplcs})
 
             });
             if (response.ok) {
                 const data = await response.json();
-                plclist = data;
-                noplcAvailable = plclist.length === 0;
+                console.log(data)
+                plclist = data.plcs;
+               // noplcAvailable = plclist.length === 0;
                 isModalOpen = false;
             } else {
                 const errorData = await response.json();
@@ -52,9 +53,9 @@
 
         isCreating = true;
         try {
-            const response = await fetch(createplc,{
+            const response = await fetch(createplc + data.listofplcs,{
                 method:"POST",
-                credentials: "include",
+                //credentials: "include",
                 body:JSON.stringify({ plc_id : newplcid, label : newplclabel , user_id : data.listofplcs})
             });
         
@@ -88,20 +89,12 @@
         isModalOpen = !isModalOpen;
     }
 
-    // const plcs = [
-    //     { plcid: 1, plclabel: "Plc name" },
-    // ];
     
-    // function addUser() {
-    //     console.log('Adding PLC:', plcid, plclabel);
-    //     plcid = ''; 
-    //     plclabel = ''; 
-    //     toggleModal();
-    // }
 </script>
 
 <div class="relative h-screen bg-white text-black">
   
+   <!-- svelte-ignore a11y_consider_explicit_label -->
    <button
         class="fixed top-4 left-4 p-4 text-1xl bg-blue-400 text-white rounded-xl shadow-2xl transition duration-300"
         on:click={toggleDrawer}
@@ -118,10 +111,10 @@
             {#each plclist as plc }
                 <div class="p-4">
                     <div class="border-l-4 border-b-4 border-l-blue-400  border-b-blue-400 rounded-2xl p-6 bg-white shadow-xl flex flex-col h-72 transition-transform duration-300 hover:border-l-0 hover:border-b-0 hover:shadow-xl">
-                        <span class="text-start mt-2 text-2xl font-semibold">{plc.plcid}</span>
+                        <span class="text-start mt-2 text-2xl font-semibold">{plc.plc_id}</span>
                         <div class="flex-grow"></div>
                         <button class="text-xl p-3 rounded-lg  text-white font-medium self-end bg-blue-400"
-                         on:click={()=>goto("/driers")}
+                         on:click={()=>goto("/users/"+data.listofplcs +"/"+plc.plc_id)}
                         >
                             Manage
                         </button>
@@ -131,6 +124,7 @@
         </div>
     </div>
 
+    <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
     class="w-16 h-16 bg-blue-400 fixed bottom-12 right-8 text-white text-3xl font-medium rounded-full shadow-xl flex items-center justify-center"
     on:click={toggleModal}
@@ -149,8 +143,8 @@
                     <input
                         id="label"
                         type="text"
-                        bind:value={newplcid}
-                        placeholder="PLC SUB ID"
+                        bind:value={newplclabel}
+                        placeholder="Label"
                         class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-blue-400 focus:shadow-outline"
                     />
                 </div>
@@ -159,8 +153,8 @@
                     <input
                         id="label"
                         type="text"
-                        bind:value={newplclabel}
-                        placeholder="PLC TAG NAME"
+                        bind:value={newplcid}
+                        placeholder="PLC ID"
                         class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-blue-400 focus:shadow-outline"
                     />
                 </div>

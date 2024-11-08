@@ -1,5 +1,4 @@
 <script>
-// @ts-nocheck
 
     import { goto } from '$app/navigation';
     import Drawer from '$lib/Drawer.svelte';
@@ -24,13 +23,15 @@
         isLoading = true;
         try {
             const response = await fetch(getusers, {
-                method: "GET",
-                credentials: "include"
+                method: "GET",  
             });
             if (response.ok) {
+                
                 const data = await response.json();
-                usersList = data;
-                noUsersAvailable = usersList.length === 0;
+                console.log(data.users)
+                usersList = data.users;
+
+                //noUsersAvailable = usersList.length === 0;
                 isModalOpen = false;
             } else {
                 const errorData = await response.json();
@@ -49,7 +50,6 @@
         try {
             const response = await fetch(createuser, {
                 method: "POST",
-                credentials: "include",
                 body: JSON.stringify({ label: newuserlabel, email: newuseremail, password: newuserpassword }),
             });
 
@@ -84,6 +84,7 @@
 </script>
 
 <div class="relative h-screen bg-white text-black">
+    <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
         class="fixed top-4 left-4 p-4 text-1xl bg-blue-400 text-white rounded-xl shadow-2xl transition duration-300"
         on:click={toggleDrawer}
@@ -99,10 +100,10 @@
             {#each usersList as  user}
                 <div class="p-4">
                     <div class="border-b-[5px] border-l-[5px] border-blue-400 rounded-2xl p-6 bg-white flex flex-col h-72 duration-75 hover:border-l-0 hover:border-b-0 shadow-lg">
-                        <span class="text-start mt-2 text-2xl font-semibold">{user.name}</span>
+                        <span class="text-start mt-2 text-2xl font-semibold">{user.label}</span>
                         <div class="flex-grow"></div>
                         <button class="text-xl p-3 rounded-lg bg-blue-400 text-white font-bold self-end"
-                            on:click={() => goto("/listofplcs")}
+                            on:click={() => goto("/users/"+user.user_id)}
                         >
                             Manage
                         </button>
@@ -112,6 +113,7 @@
         </div>
     </div>
 
+    <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
         class="w-16 h-16 bg-blue-400 fixed bottom-12 right-8 text-white text-3xl font-medium rounded-full shadow-xl flex items-center justify-center"
         on:click={toggleModal}
@@ -159,9 +161,15 @@
                         <button
                             type="submit"
                             class="bg-blue-400 text-white font-bold py-3 px-4 text-lg rounded-lg w-full flex items-center justify-center"
+                            
                         >
-                            Add
+                        {#if isUserAddedLoading}
+                        <div class="button-spinner"></div>
+                    {:else}
+                        Add
+                    {/if}
                         </button>
+                        
                     </div>
                 </form>
                 <button
@@ -178,3 +186,28 @@
         <Successmessage successMessage={sucessmessage} />
     {/if}
 </div>
+<style>
+    .spinner, .button-spinner {
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    .spinner {
+        border: 8px solid rgba(0, 0, 0, 0);
+        border-top: 8px solid black;
+        width: 64px;
+        height: 64px;
+    }
+    
+    .button-spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-top: 4px solid #ffffff;
+        width: 24px;
+        height: 24px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>

@@ -4,6 +4,7 @@
     import { fade } from 'svelte/transition';
     import { getdriers , createdrier} from '$lib/urls';
     import { onMount } from 'svelte';
+    import { page } from '$app/stores';
     
 
     let isLoading =true;
@@ -22,16 +23,17 @@
 const fetchdrier = async () =>{
     isLoading =true;
     try {
-        const response = await fetch(getdriers,{
+        const response = await fetch(getdriers + data.listofdriers,{
             method:"GET",
-            credentials: "include",
-            body:JSON.stringify({user_id:data.listofplcs , plc_id:data.listofdriers})
+          //  credentials: "include",
+            //body:JSON.stringify({user_id:data.listofplcs , plc_id:data.listofdriers})
 
         });
         if (response.ok) {
             const data = await response.json();
-            drierlist = data;
-            nodrierAvailable = drierlist.length === 0;
+            drierlist = data.driers;
+            console.log(data)
+            //nodrierAvailable = drierlist.length === 0;
             isModalOpen = false;
         } else {
             const errorData = await response.json();
@@ -48,9 +50,9 @@ const addDrier = async () => {
 
     isCreating = true;
     try {
-        const response = await fetch(createdrier,{
+        const response = await fetch(createdrier +data.listofdriers,{
             method:"POST",
-            credentials: "include",
+            //credentials: "include",
             body:JSON.stringify({ label : newdrierlabel , user_id : data.listofplcs , plc_id : data.listofdriers})
         });
     
@@ -100,9 +102,10 @@ onMount(fetchdrier);
                 <div class="p-4">
                     <div class="border-l-4 border-b-4 border-l-blue-400 border-b-blue-400 rounded-2xl p-6 bg-white shadow-2xl flex flex-col h-72 transition-transform duration-75 hover:border-l-0 hover:border-b-0 hover:shadow-xl">
                         <span class="text-start mt-2 text-2xl font-semibold">{drier.label}</span>
+                        <!-- <span class="text-start mt-2 text-2xl font-semibold">{drier.drier_id}</span> -->
                         <div class="flex-grow"></div>
                         <button class="text-xl p-3 rounded-lg bg-blue-400 text-white font-medium self-end"
-                            on:click={() => goto("/registertables")}
+                            on:click={() => goto("/users/"+$page.params.listofplcs+"/"+data.listofdriers+"/"+drier.drier_id)}
                         >
                             Manage
                         </button>
@@ -112,6 +115,7 @@ onMount(fetchdrier);
         </div>
     </div>
 
+    <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
      class="w-16 h-16 bg-blue-400 fixed bottom-12 right-8 text-white text-3xl font-medium rounded-full shadow-xl flex items-center justify-center"
      on:click={toggleModal}
@@ -123,7 +127,6 @@ onMount(fetchdrier);
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" transition:fade>
         <div class="max-w-md w-full bg-white rounded-3xl p-6 shadow-lg relative">
             <h3 class="text-center text-2xl py-4 mb-4 font-bold">Create New Drier</h3>
-            
             <form on:submit={addDrier}>
                 <div class="mb-8">
                     <label class="block text-black text-xl font-semibold mb-2" for="driername"></label>
@@ -131,12 +134,10 @@ onMount(fetchdrier);
                         id="driername"
                         type="text"
                         bind:value={newdrierlabel}
-                        placeholder="TAG NAME"
+                        placeholder="Drier Name"
                         class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-blue-400 focus:shadow-outline"
                     />
                 </div>
-                
-
                 <div class="flex items-center justify-center">
                     <button
                         type="submit"
