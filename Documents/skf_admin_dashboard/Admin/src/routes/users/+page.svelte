@@ -1,5 +1,4 @@
 <script>
-
     import { goto } from '$app/navigation';
     import Drawer from '$lib/Drawer.svelte';
     import Successmessage from '$lib/successmessage.svelte';
@@ -7,7 +6,6 @@
     import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
 
-    
     let usersList = [];
     let newuserlabel = '';
     let newuseremail = '';
@@ -22,17 +20,22 @@
     const fetchUsers = async () => {
         isLoading = true;
         try {
+            console.log("Fetching users from: ", getusers);
             const response = await fetch(getusers, {
                 method: "GET",  
             });
+            
             if (response.ok) {
-                
-                const data = await response.json();
-                console.log(data.users)
-                usersList = data.users;
-
-                //noUsersAvailable = usersList.length === 0;
-                isModalOpen = false;
+                const text = await response.text();  // Get raw response text
+                if (text) {
+                    const data = JSON.parse(text);  // Parse the response as JSON
+                    usersList = data.users || [];    // Default to empty array if no users
+                    noUsersAvailable = usersList.length === 0;  // Check if no users
+                    isModalOpen = false;
+                } else {
+                    console.error("No data returned from the server.");
+                    noUsersAvailable = true;
+                }
             } else {
                 const errorData = await response.json();
                 console.error("Error fetching users:", errorData['message']);
@@ -45,7 +48,6 @@
     };
 
     const CreateUser = async () => {
-
         isUserAddedLoading = true;
         try {
             const response = await fetch(createuser, {
@@ -81,12 +83,16 @@
     function toggleModal() {
         isModalOpen = !isModalOpen;
     }
+
+    const toUpperCase = (event) => {
+        newuserlabel = event.target.value.toUpperCase();
+    };
 </script>
 
 <div class="relative h-screen bg-white text-black">
-    <!-- svelte-ignore a11y_consider_explicit_label -->
+    <!-- Drawer Button -->
     <button
-        class="fixed top-4 left-4 p-4 text-1xl bg-blue-400 text-white rounded-xl shadow-2xl transition duration-300"
+        class="fixed top-4 left-4 p-4 text-1xl bg-blue-400 text-white rounded-xl shadow-2xl transition duration-300 z-50"
         on:click={toggleDrawer}
     >
         <i class="fas fa-bars"></i>
@@ -96,33 +102,49 @@
 
     <div class="p-8">
         <h2 class="text-3xl font-bold mb-6 mx-10">Users</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {#each usersList as user}
-                <div class="p-4">
-                    <div class="border-b-[5px] border-l-[5px] border-blue-400 rounded-2xl p-6 bg-white flex flex-col h-72 duration-75 hover:border-l-0 hover:border-b-0 shadow-lg">
-                        <span class="text-start mt-2 text-2xl font-semibold">{user.label}</span>
-                        <div class="flex-grow"></div>
-                        <button class="text-xl p-3 rounded-lg bg-blue-400 text-white font-bold self-end"
-                            on:click={() => goto("/users/"+user.user_id)}
-                        >
-                            Manage
-                        </button>
+    
+        <!-- Loading Spinner -->
+        {#if isLoading}
+            <div class="fixed inset-0 flex items-center justify-center z-40">
+                <div class="w-16 h-16 border-8 border-solid border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        {:else if noUsersAvailable}
+            <!-- No users available message -->
+            <div class="center flex-col text-center z-30">
+                <i class="fa-solid fa-users-slash text-8xl mb-4"></i>
+                <h1 class="text-4xl font-bold">No users available</h1>
+            </div>
+        {:else}
+            <!-- Grid layout for user cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 transition-all duration-300 z-0">
+                {#each usersList as user}
+                    <div class="p-4">
+                        <div class="border-b-[5px] border-l-[5px] border-blue-400 rounded-2xl p-6 bg-white flex flex-col h-72 duration-75 hover:border-l-0 hover:border-b-0 shadow-lg">
+                            <span class="text-start mt-2 text-2xl font-semibold">{user.label}</span>
+                            <div class="flex-grow"></div>
+                            <button class="text-xl p-3 rounded-lg bg-blue-400 text-white font-bold self-end"
+                                on:click={() => goto("/users/" + user.user_id)}
+                            >
+                                Manage
+                            </button>
+                        </div>
                     </div>
-                </div>
-            {/each}
-        </div>
+                {/each}
+            </div>
+        {/if}
     </div>
 
-    <!-- svelte-ignore a11y_consider_explicit_label -->
+    <!-- Add User Button -->
     <button
-        class="w-16 h-16 bg-blue-400 fixed bottom-12 right-8 text-white text-3xl font-medium rounded-full shadow-xl flex items-center justify-center"
+        class="w-16 h-16 bg-blue-400 fixed bottom-12 right-8 text-white text-3xl font-medium rounded-full shadow-xl flex items-center justify-center z-50"
         on:click={toggleModal}
     >
         <i class="fas fa-plus"></i>
     </button>
 
+    <!-- Create User Modal -->
     {#if isModalOpen}
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" transition:fade>
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" transition:fade>
             <div class="max-w-md w-full bg-white rounded-3xl p-6 shadow-lg relative">
                 <h3 class="text-center text-2xl py-4 mb-4 font-bold">Create New User</h3>
                 
@@ -135,6 +157,7 @@
                             bind:value={newuserlabel}
                             placeholder="Label Name"
                             class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-blue-400 focus:shadow-outline"
+                            on:input={toUpperCase}
                         />
                     </div>
                     <div class="mb-8">
@@ -161,15 +184,13 @@
                         <button
                             type="submit"
                             class="bg-blue-400 text-white font-bold py-3 px-4 text-lg rounded-lg w-full flex items-center justify-center"
-                            
                         >
-                        {#if isUserAddedLoading}
-                        <div class="button-spinner"></div>
-                    {:else}
-                        Add
-                    {/if}
+                            {#if isUserAddedLoading}
+                                <div class="w-6 h-6 border-4 border-solid border-white border-t-transparent rounded-full animate-spin"></div>
+                            {:else}
+                                Add
+                            {/if}
                         </button>
-                        
                     </div>
                 </form>
                 <button
@@ -186,28 +207,17 @@
         <Successmessage successMessage={sucessmessage} />
     {/if}
 </div>
-<style>
-    .spinner, .button-spinner {
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-    
-    .spinner {
-        border: 8px solid rgba(0, 0, 0, 0);
-        border-top: 8px solid black;
-        width: 64px;
-        height: 64px;
-    }
-    
-    .button-spinner {
-        border: 4px solid rgba(0, 0, 0, 0.1);
-        border-top: 4px solid #ffffff;
-        width: 24px;
-        height: 24px;
-    }
 
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+<style>
+    .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 100%;
     }
 </style>

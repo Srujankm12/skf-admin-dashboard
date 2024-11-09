@@ -1,32 +1,40 @@
 <script>
-    import { getdriers } from '$lib/urls';
+    import { getdriers, deletedrier } from '$lib/urls';
     import { onMount } from 'svelte';
     import Drawer from '$lib/Drawer.svelte';
+    import { fade } from 'svelte/transition';
+    import { page } from '$app/stores';
 
-    let drierList = []; 
+    let drierList ;
     let isDrawerOpen = false;
     let isLoading = false;
     let showDeleteModal = false;
     let deleteErrorMessage = '';
     let drierNameToDelete = '';
+    let drierIdToDelete='';
     let drierNameInput = '';
     let responseMessage = '';
     export let data;
-    
-    const fetchDriers = async () => {
+
+    const fetchdrier = async () => {
         isLoading = true;
         try {
-            const response = await fetch(getdriers + data.deletedrier, { method: "GET" });
+            const response = await fetch(getdriers + data.deletedrier, {
+                method: 'GET',
+            });
+
             if (response.ok) {
-                const result = await response.json();
-                drierList = result.driers;
+                const data = await response.json();
+                drierList = data.driers;
+                console.log(data); // You can remove this line for production
+                isLoading = false;
             } else {
                 const errorData = await response.json();
-                console.error("Error fetching driers:", errorData['message']);
+                console.error('Error fetching driers:', errorData.message);
+                isLoading = false;
             }
         } catch (error) {
-            console.error("Error fetching driers:", error);
-        } finally {
+            console.error('Error fetching driers:', error);
             isLoading = false;
         }
     };
@@ -38,14 +46,19 @@
         }
         isLoading = true;
         try {
-            const response = await fetch(deleteDrier +data.deleteDrier, { method: "DELETE" });
+            const response = await fetch(
+                deletedrier+$page.params.deletedrier+'/'+drierIdToDelete,
+                {
+                    method: 'GET',  
+                }
+            );
             const result = await response.json();
             if (response.ok) {
                 showDeleteModal = false;
                 drierNameToDelete = '';
                 drierNameInput = '';
                 deleteErrorMessage = '';
-                await fetchDriers();
+                await fetchdrier();
             } else {
                 responseMessage = result.message || 'Unexpected error';
             }
@@ -57,7 +70,7 @@
     };
 
     onMount(() => {
-        fetchDriers();
+        fetchdrier();
     });
 
     function toggleDrawer() {
@@ -69,6 +82,7 @@
         showDeleteModal = true;
         drierNameInput = '';
         deleteErrorMessage = '';
+        drierIdToDelete=drier.drier_id;
     }
 
     function closeModal() {
@@ -105,10 +119,7 @@
                             </span>
                             <div class="flex items-center space-x-3">
                                 <!-- svelte-ignore a11y_consider_explicit_label -->
-                                <button
-                                    class="text-red-600"
-                                    on:click={() => openDeleteModal(drier)}  
-                                >
+                                <button class="text-red-600" on:click={() => openDeleteModal(drier)}>
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -132,9 +143,13 @@
                 type="text"
                 placeholder="Enter Drier Name"
                 class="w-full p-3 border border-gray-300 rounded-lg text-lg mb-4"
+                bind:value={drierNameInput}
             />
             {#if deleteErrorMessage}
                 <p class="text-red-500 mb-4">{deleteErrorMessage}</p>
+            {/if}
+            {#if responseMessage}
+                <p class="text-red-500 mb-4">{responseMessage}</p>
             {/if}
             <div class="flex justify-between">
                 <button

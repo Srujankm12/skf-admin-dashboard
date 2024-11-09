@@ -7,16 +7,16 @@ export let deleteadmin = url + "/root/delete/admin/__ADMIN_ID__"
 
 //user
 export let createuser = url + "/admin/create/user"
-export let deleteuser = url + "/admin/delete/user/__USER_ID__"
+export let deleteuser = url + "/admin/delete/user/"
 export let getusers = url + "/admin/users"
 
 //plc
 export let createplc = url + "/admin/create/plc/"
-export let deleteplc = url + "/admin/delete/plc/__PLC_ID__"
+export let deleteplc = url + "/admin/delete/plc/"
 export let getplc = url + "/admin/plcs/"
 //drier
 export let createdrier = url + "/admin/create/drier/"
-export let deletedrier = url + "/admin/delete/drier/__PLC_ID__/__DRIER_ID__"
+export let deletedrier = url + "/admin/delete/drier/"
 export let getdriers = url + "/admin/driers/"
 
 //register
