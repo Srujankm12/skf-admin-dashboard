@@ -1,7 +1,7 @@
 <script>
     import Drawer from '$lib/Drawer.svelte';
     import { fade } from 'svelte/transition';
-    import { getregisters , createregister} from '$lib/urls';
+    import { getregisters } from '$lib/urls';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
 
@@ -90,28 +90,36 @@ if(response.ok){
        
         showDeleteModal = true;
     }
-   function formatTimestamp(timestamp) {
-        const date = new Date(timestamp);
-        
-        // Extract hours, minutes, and seconds in UTC
-        let hours = date.getUTCHours();
-        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-        const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+    function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
 
-        // Determine AM or PM
-        const period = hours >= 12 ? 'PM' : 'AM';
-        
-        // Convert to 12-hour format
-        hours = hours % 12;
-        hours = hours ? hours : 12; // Handle 0 as 12
-        
-        // Format hours, minutes, and seconds
-        const formattedTime = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${period}`;
-        return formattedTime;
-    }
+    // Extract the full date in UTC
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+    const year = date.getUTCFullYear();
+
+    // Extract time in UTC
+    let hours = date.getUTCHours();
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+
+    // Determine AM or PM
+    const period = hours >= 12 ? 'PM' : 'AM';
+    
+    // Convert to 12-hour format
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Handle 0 as 12
+
+    // Format the date and time
+    const formattedDate = `${day}/${month}/${year}`;
+    const formattedTime = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${period}`;
+    
+    // Return both date and time separately
+    return { date: formattedDate, time: formattedTime };
+}
+
 
 </script>
-
 <div class="relative h-screen bg-white text-black">
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
@@ -132,6 +140,7 @@ if(response.ok){
                     <th class="py-4 px-6 text-center font-semibold">Register Address</th>
                     <th class="py-4 px-6 text-center font-semibold">Tag Name</th>
                     <th class="py-4 px-6 text-center font-semibold">Value</th>
+                    <th class="py-4 px-6 text-center font-semibold">Last Updated Date</th>
                     <th class="py-4 px-6 text-center font-semibold">Last Updated Time</th>
                     <th class="py-4 px-6 text-center font-semibold">Actions</th>
                 </tr>
@@ -139,13 +148,25 @@ if(response.ok){
             <tbody>
                 {#each registerData as register, index}
                     <tr class="border-b hover:bg-gray-50">
-                        <td class="py-4 px-6 text-center">{index+1}</td>
+                        <td class="py-4 px-6 text-center">{index + 1}</td>
                         <td class="py-4 px-6 text-center">{register.reg_address}</td>
                         <td class="py-4 px-6 text-center">{register.label}</td>
                         <td class="py-4 px-6 text-center">{register.value}</td>
+
+                       
                         <td class="py-4 px-6 text-center">
-                            {formatTimestamp(register.last_update_timestamp)}
+                            {#if register.last_update_timestamp}
+                                {formatTimestamp(register.last_update_timestamp).date}
+                            {/if}
                         </td>
+
+                        
+                        <td class="py-4 px-6 text-center">
+                            {#if register.last_update_timestamp}
+                                {formatTimestamp(register.last_update_timestamp).time}
+                            {/if}
+                        </td>
+
                         <td class="py-4 px-6 text-center">
                             <!-- svelte-ignore a11y_consider_explicit_label -->
                             <button
@@ -169,47 +190,6 @@ if(response.ok){
             <i class="fas fa-plus"></i>
         </button>
     </div>
-    
-    <!-- {#if showDeleteModal}
-        <div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-6" transition:fade>
-            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-                <h1 class="text-xl font-bold mb-4">Confirm Deletion</h1>
-                <p class="text-gray-700 mb-4">Are you sure you want to delete : <strong></strong>?</p>
-                <p class="text-gray-600 mb-4">Type the " " below to confirm:</p>
-                <input
-                    bind:value={unitId}
-                    name="unitIdInput"
-                    type="text"
-                    placeholder="Enter "
-                    class="w-full p-3 border border-gray-300 rounded-lg text-lg mb-4 focus:outline-blue-400"
-                    
-                />
-                {#if deleteErrorMessage}
-                    <p class="text-red-500 mb-4">{deleteErrorMessage}</p>
-                {/if}
-                <div class="flex justify-between">
-                    <button
-                        class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg flex items-center"
-                        on:click={deleteMachine}
-                        disabled={isLoading}
-                    >
-                        {#if isLoading}
-                            <div class="spinner-delete"></div>
-                        {:else}
-                            <i class="fas fa-trash-alt mr-2"></i> Delete
-                        {/if}
-                    </button>
-                    <button
-                        class="bg-blue-400 shadow-lg text-white font-bold py-2 px-4 rounded-lg"
-                        on:click={() => showDeleteModal = false}
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-    {/if} -->
-
 
     {#if isModalOpen}
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" transition:fade>

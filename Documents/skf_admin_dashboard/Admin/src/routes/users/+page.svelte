@@ -97,7 +97,7 @@
     <div class="p-8">
         <h2 class="text-3xl font-bold mb-6 mx-10">Users</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {#each usersList as  user}
+            {#each usersList as user}
                 <div class="p-4">
                     <div class="border-b-[5px] border-l-[5px] border-blue-400 rounded-2xl p-6 bg-white flex flex-col h-72 duration-75 hover:border-l-0 hover:border-b-0 shadow-lg">
                         <span class="text-start mt-2 text-2xl font-semibold">{user.label}</span>
