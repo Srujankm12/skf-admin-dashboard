@@ -6,7 +6,8 @@
     // Component state
     let password = '';
     let selectedUser = '';
-    let users = [];
+    let usersList = [];
+    let users ;
     let isLoading = true;
     let isSubmitting = false;
     let message = '';
@@ -18,14 +19,14 @@
         isLoading = true;
         try {
             const response = await fetch(getusers, {
-                method: "POST",
-                credentials: "include",
-                body: JSON.stringify({}),
+                method: "GET",
             });
 
             if (response.ok) {
                 const data = await response.json();
-                users = data.data;
+                
+                users = data['users'];
+                console.log(users[0])
                 message = '';
             } else {
                 const errorData = await response.json();
@@ -36,20 +37,20 @@
             message = "An error occurred. Please try again.";
         } finally {
             isLoading = false;
-            if (users === null) {
+            if(users === null){
                 isLoading = true;
             }
         }
     };
-
     // Request access to a user
     const requestAccess = async () => {
         isSubmitting = true;
         try {
+            console.log(selectedUser);
             const response = await fetch(giveaccesstouser, {
                 method: "POST",
-                credentials: "include",
-                body: JSON.stringify({ user_name: selectedUser, password }),
+               
+                body: JSON.stringify({ "user_id": selectedUser,"password": password ,}),
             });
 
             if (response.ok) {
@@ -127,11 +128,11 @@
                     bind:value={selectedUser}
                     name="user"
                     id="user"
-                    class="w-full border rounded-lg py-3 px-4 text-gray-700 text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    class="w-full border rounded-lg py-3 px-4 text-black text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                     <option value="" disabled>Select a user</option>
-                    {#each users as { user_name }}
-                        <option value={user_name}>{user_name}</option>
+                    {#each users as user}
+                        <option value={selectedUser = user['user_id']}>{user['label']}</option>
                     {/each}
                 </select>
             </div>

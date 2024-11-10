@@ -91,6 +91,7 @@
 
 <div class="relative h-screen bg-white text-black">
     <!-- Drawer Button -->
+    <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
         class="fixed top-4 left-4 p-4 text-1xl bg-blue-400 text-white rounded-xl shadow-2xl transition duration-300 z-50"
         on:click={toggleDrawer}
@@ -135,6 +136,7 @@
     </div>
 
     <!-- Add User Button -->
+    <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
         class="w-16 h-16 bg-blue-400 fixed bottom-12 right-8 text-white text-3xl font-medium rounded-full shadow-xl flex items-center justify-center z-50"
         on:click={toggleModal}
