@@ -14,7 +14,7 @@
     let plcNameToDelete = '';
     let deleteErrorMessage = '';
     let responseMessage = '';
-    let isplcdeleteLoading = false;
+    let loading = false;
 
     export let data;
 
@@ -99,7 +99,7 @@
 <div class="relative h-screen bg-white text-black">
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
-        class="fixed top-4 left-4 p-4 text-1xl bg-blue-400 text-white rounded-xl shadow-2xl transition duration-300"
+        class="fixed top-1 left-4 p-4 text-2xl  text-white rounded-xl  transition duration-300 z-50"
         on:click={toggleDrawer}
     >
         <i class="fas fa-bars"></i>
@@ -123,18 +123,21 @@
                             <span class="text-gray-800 font-semibold text-lg">
                                 {plc.plc_id}
                             </span>
-                            <div class="flex items-center space-x-3">
-                                <button class="bg-blue-400 text-white font-medium rounded-md px-4 py-2 transition-colors hover:bg-blue-500"
-                                    on:click={() => goto("/settings/"+data.deleteplc+"/"+plc.plc_id)}
-                                >
-                                    Manage
-                                </button>
+                            <div class="flex items-center space-x-6">
                                 <!-- svelte-ignore a11y_consider_explicit_label -->
                                 <button class="text-red-600"
-                                    on:click={() => openDeleteModal(plc)}
+                                on:click={() => openDeleteModal(plc)}
+                            >
+                                <i class="fas fa-trash"></i>
+                            </button>
+                                <!-- svelte-ignore a11y_consider_explicit_label -->
+                                <button class=""
+                                    on:click={() => goto("/settings/"+data.deleteplc+"/"+plc.plc_id)}
                                 >
-                                    <i class="fas fa-trash"></i>
+                                <i class="fas fa-arrow-right text-2xl"></i>
                                 </button>
+                                <!-- svelte-ignore a11y_consider_explicit_label -->
+                               
                             </div>
                         </div>
                     </div>
@@ -168,13 +171,13 @@
             <button
                 class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg flex items-center"
                 on:click={deletePlc}
-                disabled={isLoading}
+                disabled={loading}
             >
-            {#if isplcdeleteLoading}
+            {#if loading}
             <div class="animate-spin rounded-full h-6 w-6 border-t-4 border-white border-solid border-transparent"></div>
-            {:else}
-                Add
-            {/if}
+        {:else}
+            Delete
+        {/if}
             </button>
             <button
                 class="bg-white shadow-lg text-gray-800 font-bold py-2 px-4 rounded-lg"

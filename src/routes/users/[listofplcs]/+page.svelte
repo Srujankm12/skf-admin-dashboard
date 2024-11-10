@@ -84,11 +84,12 @@
   
    <!-- svelte-ignore a11y_consider_explicit_label -->
    <button
-        class="fixed top-4 left-4 p-4 text-1xl bg-blue-400 text-white rounded-xl shadow-2xl transition duration-300 z-50"
+        class="fixed top-1 left-4 p-4 text-2xl  text-white rounded-xl  transition duration-300 z-50"
         on:click={toggleDrawer}
     >
         <i class="fas fa-bars"></i>
-    </button> 
+    </button>
+
 
    <Drawer {isDrawerOpen} {toggleDrawer} /> 
     
@@ -106,12 +107,12 @@
             <h1 class="text-4xl font-bold">No PLCs available</h1>
         </div>
     {:else}
-        <!-- PLC List Grid -->
+        <!-- PLC List Grid -->  
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 transition-all duration-300 z-0">
             {#each plclist as plc}
                 <div class="p-4">
                     <div class="border-b-[5px] border-l-[5px] border-blue-400 rounded-2xl p-6 bg-white flex flex-col h-72 duration-75 hover:border-l-0 hover:border-b-0 shadow-lg">
-                        <span class="text-start mt-2 text-2xl font-semibold">{plc.plc_id}</span>
+                        <span class="text-start mt-2 text-2xl font-semibold">{plc.label}</span>
                         <div class="flex-grow"></div>
                         <button class="text-xl p-3 rounded-lg bg-blue-400 text-white font-bold self-end"
                             on:click={() => goto("/users/" + data.listofplcs + "/" + plc.plc_id)}>

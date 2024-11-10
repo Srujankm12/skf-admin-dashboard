@@ -96,7 +96,7 @@
 <div class="relative h-screen bg-white text-black">
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
-        class="fixed top-4 left-4 p-4 text-1xl bg-blue-400 text-white rounded-xl shadow-2xl transition duration-300"
+        class="fixed top-1 left-4 p-4 text-2xl  text-white rounded-xl  transition duration-300 z-50"
         on:click={toggleDrawer}
     >
         <i class="fas fa-bars"></i>
@@ -118,18 +118,25 @@
                     <div class="border-b-[5px] border-l-[5px] border-blue-400 rounded-2xl px-6 py-6 bg-white flex flex-col h-24 duration-75 hover:border-l-0 hover:border-b-0 shadow-lg">
                         <div class="flex items-center justify-between rounded-lg p-2">
                             <span class="text-gray-800 font-semibold text-lg">{user.label}</span>
-                            <div class="flex items-center space-x-3">
-                                <button class="bg-blue-400 text-white font-medium rounded-md px-4 py-2 transition-colors hover:bg-blue-500"
-                                    on:click={() => goto("/settings/"+user.user_id)}
-                                >
-                                    Manage
-                                </button>
+                            <div class="flex items-center space-x-6">
                                 <!-- svelte-ignore a11y_consider_explicit_label -->
                                 <button class="text-red-600"
-                                    on:click={() => openDeleteModal(user)}
+                                on:click={() => openDeleteModal(user)}
+                            >
+                                <i class="fas fa-trash"></i>
+                            </button>
+                                <!-- svelte-ignore a11y_consider_explicit_label -->
+                                <button class=""
+                                    on:click={() => goto("/settings/"+user.user_id)}
                                 >
-                                    <i class="fas fa-trash"></i>
+                                <i class="fas fa-arrow-right text-2xl"></i>
+
+
+
+                                     
                                 </button>
+                                <!-- svelte-ignore a11y_consider_explicit_label -->
+                               
                             </div>
                         </div>
                     </div>

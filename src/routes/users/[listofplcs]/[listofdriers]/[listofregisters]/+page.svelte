@@ -123,17 +123,22 @@ if(response.ok){
 <div class="relative h-screen bg-white text-black">
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
-        class="fixed top-4 left-4 p-4 text-1xl bg-blue-400 text-white rounded-xl shadow-2xl transition duration-300"
-        on:click={toggleDrawer}
-    >
-        <i class="fas fa-bars"></i>
-    </button>
+    class="fixed top-1 left-4 p-4 text-2xl  text-white rounded-xl  transition duration-300 z-50"
+    on:click={toggleDrawer}
+>
+    <i class="fas fa-bars"></i>
+</button>
 
     <Drawer {isDrawerOpen} {toggleDrawer} />
 
     <div class="p-8">
         <h3 class="text-2xl font-bold mb-6 text-center">Registers</h3>
-        <table class="w-full text-left border-collapse bg-white shadow-lg rounded-lg overflow-hidden">
+        {#if isLoading}
+        <div class="fixed inset-0 flex items-center justify-center z-50">
+            <div class="w-16 h-16 border-6 border-t-8 border-blue-400 border-solid rounded-full animate-spin"></div>
+        </div>
+    {:else}
+        <table class="w-full text-left border-collapse bg-white  rounded-lg overflow-hidden">
             <thead>
                 <tr class="bg-blue-400 text-white">
                     <th class="py-4 px-6 text-center font-semibold">Sl No</th>
@@ -181,7 +186,7 @@ if(response.ok){
                 {/each}
             </tbody>
         </table>
-
+{/if}
         <!-- svelte-ignore a11y_consider_explicit_label -->
         <button
             class="w-16 h-16 bg-blue-400 fixed bottom-12 right-8 text-white text-3xl font-medium rounded-full shadow-xl flex items-center justify-center"

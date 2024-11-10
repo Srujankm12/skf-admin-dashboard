@@ -81,12 +81,11 @@
 <div class="relative h-screen bg-white text-black">
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
-        class="fixed top-4 left-4 p-4 text-1xl bg-blue-400 text-white rounded-xl shadow-2xl transition duration-300 z-50"
-        on:click={toggleDrawer}
-    >
-        <i class="fas fa-bars"></i>
-    </button> 
-
+    class="fixed top-1 left-4 p-4 text-2xl  text-white rounded-xl  transition duration-300 z-50"
+    on:click={toggleDrawer}
+>
+    <i class="fas fa-bars"></i>
+</button>
     <Drawer {isDrawerOpen} {toggleDrawer} />
 
     <div class="p-8">

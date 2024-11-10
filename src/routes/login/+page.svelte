@@ -3,6 +3,7 @@
 <script>
 import { goto } from "$app/navigation";
 import Errormessage from "$lib/errormessage.svelte";
+import { adminlogin} from '$lib/urls';
 
 let loading = false;
 let errorMessage = '';
@@ -16,14 +17,16 @@ const PerformLogin = async () => {
     errorMessage = '';
 
     try {
-        const response = await fetch("https://skfplc.vsensetech.in/login/admin", { 
+        const response = await fetch(adminlogin, { 
             method: "POST",
             
             body: JSON.stringify({ email, password }),
         });
 
         if (response.ok) {
+            
             await goto("/users"); 
+
         } else {
             const jsonResponse = await response.json();
             errorMessage = jsonResponse.message || 'An unexpected error occurred.';

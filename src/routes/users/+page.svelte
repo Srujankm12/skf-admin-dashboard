@@ -29,7 +29,8 @@
                 const text = await response.text(); 
                 if (text) {
                     const data = JSON.parse(text);  // Parse the response as JSON
-                    usersList = data.users || [];    // Default to empty array if no users
+                    usersList = data.users || []; 
+                    usersList = usersList.map(user => ({label: `${user.label[0].toUpperCase()}${user.label.slice(1).toLowerCase()}`,email:user.email,user_id:user.user_id}))  // Default to empty array if no users
                     noUsersAvailable = usersList.length === 0;  // Check if no users
                     isModalOpen = false;
                 } else {
@@ -84,16 +85,13 @@
         isModalOpen = !isModalOpen;
     }
 
-    const toUpperCase = (event) => {
-        newuserlabel = event.target.value.toUpperCase();
-    };
 </script>
 
 <div class="relative h-screen bg-white text-black">
     <!-- Drawer Button -->
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
-        class="fixed top-4 left-4 p-4 text-1xl bg-blue-400 text-white rounded-xl shadow-2xl transition duration-300 z-50"
+        class="fixed top-1 left-4 p-4 text-2xl  text-white rounded-xl  transition duration-300 z-50"
         on:click={toggleDrawer}
     >
         <i class="fas fa-bars"></i>
@@ -101,8 +99,8 @@
 
     <Drawer {isDrawerOpen} {toggleDrawer} />
 
-    <div class="p-8">
-        <h2 class="text-3xl font-bold mb-6 mx-10">Users</h2>
+    <div class="p-6">
+        <h2 class="text-3xl font-medium mb-10  mx-10 text-left">Users</h2>
     
         <!-- Loading Spinner -->
         {#if isLoading}
@@ -138,7 +136,7 @@
     <!-- Add User Button -->
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
-        class="w-16 h-16 bg-blue-400 fixed bottom-12 right-8 text-white text-3xl font-medium rounded-full shadow-xl flex items-center justify-center z-50"
+        class="w-16 h-16 bg-blue-400 fixed bottom-12 right-8 text-white text-3xl font-medium rounded-full shadow-xl flex items-center justify-center z-20"
         on:click={toggleModal}
     >
         <i class="fas fa-plus"></i>
@@ -146,7 +144,7 @@
 
     <!-- Create User Modal -->
     {#if isModalOpen}
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" transition:fade>
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10" transition:fade>
             <div class="max-w-md w-full bg-white rounded-3xl p-6 shadow-lg relative">
                 <h3 class="text-center text-2xl py-4 mb-4 font-bold">Create New User</h3>
                 
@@ -159,7 +157,7 @@
                             bind:value={newuserlabel}
                             placeholder="Label Name"
                             class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-blue-400 focus:shadow-outline"
-                            on:input={toUpperCase}
+                        
                         />
                     </div>
                     <div class="mb-8">
@@ -190,7 +188,7 @@
                             {#if isUserAddedLoading}
                             <div class="animate-spin rounded-full h-6 w-6 border-t-4 border-white border-solid border-transparent"></div>
                             {:else}
-                                Delete
+                                Create
                             {/if}
                         </button>
                     </div>
