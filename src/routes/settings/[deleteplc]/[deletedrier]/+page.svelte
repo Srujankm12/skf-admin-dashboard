@@ -27,6 +27,11 @@
             if (response.ok) {
                 const data = await response.json();
                 drierList = data.driers;
+                drierList = data.driers.map(drier => ({
+                ...drier,
+                label: `${drier.label[0].toUpperCase()}${drier.label.slice(1).toLowerCase()}`
+            }));
+
                 console.log(data); // You can remove this line for production
                 isLoading = false;
             } else {

@@ -4,7 +4,8 @@
     import { createplc, getplc } from '$lib/urls';
     import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
-
+    import Successmessage from '$lib/successmessage.svelte';
+    
     let isLoading = true;
     let plclist = [];
     let noplcAvailable = true;
@@ -19,28 +20,35 @@
     export let data;
 
     const fetchplc = async () => {
-        isLoading = true;
-        try {
-            const response = await fetch(getplc + data.listofplcs, {
-                method: "GET",
-            });
-            if (response.ok) {
-                const data = await response.json();
-                console.log("Fetched PLCs:", data);
-                plclist = data.plcs;
-                noplcAvailable = plclist.length === 0; // Ensure this is being set correctly
-                console.log("No PLCs Available:", noplcAvailable); // Debugging line
-                isModalOpen = false;
-            } else {
-                const errorData = await response.json();
-                console.error("Error fetching plcs:", errorData['message']);
-            }
-        } catch (error) {
-            console.error("Error fetching plcs:", error);
-        } finally {
-            isLoading = false;
+    isLoading = true;
+    try {
+        const response = await fetch(getplc + data.listofplcs, {
+            method: "GET",
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log("Fetched PLCs:", data);
+
+            // Process the PLC list and capitalize only the first letter of each label
+            plclist = data.plcs.map(plc => ({
+                ...plc,
+                label: `${plc.label[0].toUpperCase()}${plc.label.slice(1).toLowerCase()}`
+            }));
+            
+            noplcAvailable = plclist.length === 0;  // Check if no PLCs are available
+            console.log("No PLCs Available:", noplcAvailable); // Debugging line
+            isModalOpen = false;
+        } else {
+            const errorData = await response.json();
+            console.error("Error fetching PLCs:", errorData['message']);
         }
-    };
+    } catch (error) {
+        console.error("Error fetching PLCs:", error);
+    } finally {
+        isLoading = false;
+    }
+};
 
     const addPlc = async () => {
         isCreating = true;
@@ -56,7 +64,7 @@
                 createPlcID = '';
                 newplcid = '';
                 newplclabel = '';
-                responsemessage = 'Plc added successfully';
+                successmessage = 'Plc added successfully';
                 setTimeout(() => successmessage = '', 2000);
                 await fetchplc();
             } else {
@@ -183,6 +191,10 @@
         </div>
     </div>
 {/if}
+
+{#if successmessage}
+        <Successmessage successMessage={successmessage} />
+    {/if}
 </div>
 
 <style>

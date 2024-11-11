@@ -27,6 +27,11 @@
             if (response.ok) {
                 const data = await response.json();
                 usersList = data.users;
+                usersList = usersList.map(user => ({
+                        label: `${user.label[0].toUpperCase()}${user.label.slice(1).toLowerCase()}`,
+                        email: user.email,
+                        user_id: user.user_id
+                    }));
                 isLoading = false;
             } else {
                 const errorData = await response.json();
@@ -129,7 +134,7 @@
                                 <button class=""
                                     on:click={() => goto("/settings/"+user.user_id)}
                                 >
-                                <i class="fas fa-arrow-right text-2xl"></i>
+                                <i class="fas fa-arrow-right text-xl"></i>
 
 
 

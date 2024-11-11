@@ -19,27 +19,34 @@
     export let data;
 
     const fetchdrier = async () => {
-        isLoading = true;
-        try {
-            const response = await fetch(getdriers + data.listofdriers, {
-                method: "GET",
-            });
-            if (response.ok) {
-                const data = await response.json();
-                drierlist = data.driers;
-                console.log(data);
-                nodrierAvailable = drierlist.length === 0;
-                isModalOpen = false;
-            } else {
-                const errorData = await response.json();
-                console.error("Error fetching driers:", errorData['message']);
-            }
-        } catch (error) {
-            console.error("Error fetching driers:", error);
-        } finally {
-            isLoading = false;
+    isLoading = true;
+    try {
+        const response = await fetch(getdriers + data.listofdriers, {
+            method: "GET",
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+
+            // Process the drier list to capitalize only the first letter of each label
+            drierlist = data.driers.map(drier => ({
+                ...drier,
+                label: `${drier.label[0].toUpperCase()}${drier.label.slice(1).toLowerCase()}`
+            }));
+
+            nodrierAvailable = drierlist.length === 0; // Check if no driers are available
+            isModalOpen = false;
+        } else {
+            const errorData = await response.json();
+            console.error("Error fetching driers:", errorData['message']);
         }
-    };
+    } catch (error) {
+        console.error("Error fetching driers:", error);
+    } finally {
+        isLoading = false;
+    }
+};
 
     const addDrier = async () => {
         isCreating = true;

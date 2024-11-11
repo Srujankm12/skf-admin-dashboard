@@ -29,6 +29,10 @@
             if (response.ok) {
                 const data = await response.json();
                 plclist = data.plcs;
+                plclist = data.plcs.map(plc => ({
+                ...plc,
+                label: `${plc.label[0].toUpperCase()}${plc.label.slice(1).toLowerCase()}`
+            }));
                 isLoading = false;
             } else {
                 const errorData = await response.json();
@@ -81,7 +85,7 @@
     }
 
     function openDeleteModal(plc) {
-        plcNameToDelete = plc.plc_id;
+        plcNameToDelete = plc.label;
         showDeleteModal = true;
         plcNameInput = '';
         deleteErrorMessage = '';
@@ -121,7 +125,7 @@
                     <div class="border-b-[5px] border-l-[5px] border-blue-400 rounded-2xl px-6 py-6 bg-white flex flex-col h-24 duration-75 hover:border-l-0 hover:border-b-0 shadow-lg">
                         <div class="flex items-center justify-between rounded-lg p-2">
                             <span class="text-gray-800 font-semibold text-lg">
-                                {plc.plc_id}
+                                {plc.label}
                             </span>
                             <div class="flex items-center space-x-6">
                                 <!-- svelte-ignore a11y_consider_explicit_label -->
@@ -134,7 +138,7 @@
                                 <button class=""
                                     on:click={() => goto("/settings/"+data.deleteplc+"/"+plc.plc_id)}
                                 >
-                                <i class="fas fa-arrow-right text-2xl"></i>
+                                <i class="fas fa-arrow-right text-xl"></i>
                                 </button>
                                 <!-- svelte-ignore a11y_consider_explicit_label -->
                                
@@ -169,16 +173,16 @@
         {/if}
         <div class="flex justify-between">
             <button
-                class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg flex items-center"
-                on:click={deletePlc}
-                disabled={loading}
-            >
+            class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg flex items-center"
+            on:click={deletePlc}
+            disabled={loading}
+        >
             {#if loading}
-            <div class="animate-spin rounded-full h-6 w-6 border-t-4 border-white border-solid border-transparent"></div>
-        {:else}
-            Delete
-        {/if}
-            </button>
+                <div class="animate-spin rounded-full h-6 w-6 border-t-4 border-white border-solid border-transparent"></div>
+            {:else}
+                Delete
+            {/if}
+        </button>
             <button
                 class="bg-white shadow-lg text-gray-800 font-bold py-2 px-4 rounded-lg"
                 on:click={closeModal}
