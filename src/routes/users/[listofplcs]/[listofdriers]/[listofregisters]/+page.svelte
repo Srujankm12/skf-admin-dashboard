@@ -33,32 +33,39 @@
     function capitalizeFirstLetter(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
-
     const fetchRegisterData = async () => {
-        isLoading = true;
-        try {
-            const response = await fetch(getregisters + $page.params.listofdriers + "/" + $page.params.listofregisters, {
-                method: "GET",
-            });
-            if (response.ok) {
-                const data = await response.json();
-                registerData = data.registers.map(register => {
-                    return {
-                        ...register,
-                        label: capitalizeFirstLetter(register.label)
-                    };
-                });
-                console.log(data);
+    isLoading = true;
+    let hasRegisters = false;
+    try {
+        const response = await fetch(getregisters + $page.params.listofdriers + "/" + $page.params.listofregisters, {
+            method: "GET",
+        });
+        if (response.ok) {
+            const data = await response.json();
+            if (data.registers && Array.isArray(data.registers) && data.registers.length > 0) {
+                registerData = data.registers.map(register => ({
+                    ...register,
+                    label: capitalizeFirstLetter(register.label)
+                }));
+                hasRegisters = true;
             } else {
-                const errorData = await response.json();
-                console.error("Error fetching registers:", errorData['message']);
+                console.error("No registers available.");
+                registerData = [];
+                hasRegisters = false;
             }
-        } catch (error) {
-            console.error("Error fetching registers:", error);
-        } finally {
-            isLoading = false;
+            console.log(data);
+        } else {
+            const errorData = await response.json();
+            console.error("Error fetching registers:", errorData['message']);
         }
-    };
+    } catch (error) {
+        console.error("Error fetching registers:", error);
+    } finally {
+        isLoading = false;
+    }
+    return hasRegisters;
+};
+
 
     let getRegisterTypes = async () => {
         try {
