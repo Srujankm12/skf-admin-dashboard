@@ -1,7 +1,7 @@
 <script>
     import Drawer from '$lib/Drawer.svelte';
     import { fade } from 'svelte/transition';
-    import { getregisters , getregistertypesforform , createregister } from '$lib/urls';
+    import { getregisters , getregistertypesforform , createregister , deleteregister } from '$lib/urls';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
 
@@ -19,9 +19,14 @@
     let newrecipestepcount ='';
     let newtimeortempdropdown = '';
     let newrecipelabel = '';
-    
-
-
+    let showDeleteModal = false;
+    let registerNameToDelete = '';
+    let registerNameInput = '';
+    let deleteErrorMessage = '';
+    let registerAdressToDelete= '';
+    let registerTypeToDelete = '';
+    let responseMessage = '';
+    let loading = false;
 
     export let data;
 
@@ -57,7 +62,7 @@
 
     let getRegisterTypes = async () => {
         try {
-            const response = await fetch(getregistertypesforform+$page.params.listofdriers+'/'+$page.params.listofregisters , {
+            const response = await fetch(getregistertypesforform + $page.params.listofdriers + '/' + $page.params.listofregisters , {
                 method: "GET"
             });
             if(response.ok) {
@@ -71,54 +76,96 @@
             registerTypeError = error;
         }
     }
+
     let createRegister = async () => {
-    isCreating = true; 
-    try {
-        let response;
-        if (newregistertype == "rcp_stp") {
-            response = await fetch(createregister + '/' + $page.params.listofdriers + '/' + $page.params.listofregisters, {
-                method: "POST",
-                body: JSON.stringify({
-                    "reg_address": newregisteradress,
-                    "reg_type": newregistertype + "_" + newrecipestepcount + "_" + newtimeortempdropdown,
-                    "label": newregisterlabel,
-                })
-            });
-        } else {
-            response = await fetch(createregister + '/' + $page.params.listofdriers + '/' + $page.params.listofregisters, {
-                method: "POST",
-                body: JSON.stringify({
-                    "reg_address": newregisteradress,
-                    "reg_type": newregistertype,
-                    "label": newregisterlabel,
-                })
-            });
-        }
+        isCreating = true; 
+        try {
+            let response;
+            if (newregistertype == "rcp_stp") {
+                response = await fetch(createregister + '/' + $page.params.listofdriers + '/' + $page.params.listofregisters, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        "reg_address": newregisteradress,
+                        "reg_type": newregistertype + "_" + newrecipestepcount + "_" + newtimeortempdropdown,
+                        "label": newregisterlabel,
+                    })
+                });
+            } else {
+                response = await fetch(createregister + '/' + $page.params.listofdriers + '/' + $page.params.listofregisters, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        "reg_address": newregisteradress,
+                        "reg_type": newregistertype,
+                        "label": newregisterlabel,
+                    })
+                });
+            }
 
-        if (response.ok) {
-            isModalOpen = false;
-            console.log("Register created successfully");
-            window.location.reload();  // Reloads the page
-        } else {
-            console.error("Failed to create register:", await response.json());
+            if (response.ok) {
+                isModalOpen = false;
+                console.log("Register created successfully");
+                window.location.reload(); 
+            } else {
+                console.error("Failed to create register:", await response.json());
+            }
+        } catch (error) {
+            console.error("Error creating register:", error);
+        } finally {
+            isCreating = false; 
         }
-    } catch (error) {
-        console.error("Error creating register:", error);
-    } finally {
-        isCreating = false; 
+    };
+
+
+    const deleteRegister = async () => {
+        if (registerNameInput !== registerNameToDelete) {
+            deleteErrorMessage = 'Register name does not match. Please enter the correct name.';
+            return;
+        }
+        loading = true;
+        try {
+            const response = await fetch(
+                deleteregister +  $page.params.listofdriers + '/' + $page.params.listofregisters + '/'+registerAdressToDelete +'/'+registerTypeToDelete ,
+                {
+                    method: "GET",
+                }
+            );
+            const result = await response.json();
+            if (response.ok) {
+                showDeleteModal = false;
+                registerNameToDelete = '';
+                registerNameInput ='';
+                deleteErrorMessage = '';
+                await fetchRegisterData();
+            } else {
+                responseMessage = result.message || 'Unexpected error';
+            }
+        } catch (error) {
+            responseMessage = 'Fetch error: ' + error.message;
+        } finally {
+            loading = false; 
+        }
+    };
+
+    function openDeleteRegisterModal(register) {
+        registerNameToDelete = register.label;
+        showDeleteModal = true;
+        registerNameInput = '';
+        deleteErrorMessage = '';
+        registerAdressToDelete = register.reg_address;
+        registerTypeToDelete = register.reg_type;
     }
-};
 
-onMount(fetchRegisterData);
+    function closeModal() {
+        showDeleteModal = false;
+        registerNameToDelete = '';
+        deleteErrorMessage = '';
+    }
 
-    
-    
+    onMount(fetchRegisterData);
+
     function handleTypeChange() {
         additionalFieldVisible = newregistertype === 'rcp_stp';
     }
-
-
-   
 
     function toggleDrawer() {
         isDrawerOpen = !isDrawerOpen;
@@ -157,8 +204,8 @@ onMount(fetchRegisterData);
 
     <Drawer {isDrawerOpen} {toggleDrawer} />
 
-    <div class="p-8">
-        <h3 class="text-2xl font-bold mb-6 text-center">.  </h3>
+    <div class="py-24 px-7">
+
         {#if isLoading}
             <div class="fixed inset-0 flex items-center justify-center z-50">
                 <div class="w-16 h-16 border-6 border-t-8 border-blue-400 border-solid rounded-full animate-spin"></div>
@@ -198,9 +245,10 @@ onMount(fetchRegisterData);
 
                             <td class="py-4 px-6 text-center">
                                 <!-- svelte-ignore a11y_consider_explicit_label -->
-                                <button class="text-red-500 hover:text-red-700" title="Delete" on:click={() => toggleModal()}>
+                                <button class="text-red-500 hover:text-red-700" title="Delete" on:click={() => openDeleteRegisterModal(register)}>
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                
                             </td>
                         </tr>
                     {/each}
@@ -226,7 +274,7 @@ onMount(fetchRegisterData);
                             type="text"
                             bind:value={newregisteradress}
                             placeholder="Register Address"
-                            class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-blue-400 focus:shadow-outline"
                         />
                     </div>
 
@@ -236,7 +284,7 @@ onMount(fetchRegisterData);
                             id="RegisterType"
                             bind:value={newregistertype}
                             on:change={handleTypeChange}
-                            class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-blue-400 focus:shadow-outline"
                         > 
                             <option value="" disabled>Select a reg_type</option>
                             {#each registertypes as rt}
@@ -251,7 +299,7 @@ onMount(fetchRegisterData);
                             type="text"
                             bind:value={newregisterlabel}
                             placeholder="Lable name"
-                            class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-blue-400 focus:shadow-outline"
                         />
                     </div>
 
@@ -263,7 +311,7 @@ onMount(fetchRegisterData);
                                 type="text"
                                 bind:value={newrecipestepcount}
                                 placeholder=" Recepie Step count"
-                                class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-blue-400 focus:shadow-outline"
                             />
                         </div>
                         <div class="mb-8">
@@ -271,7 +319,7 @@ onMount(fetchRegisterData);
                             <select
                                 id="NewDropdownField"
                                 bind:value={newtimeortempdropdown}
-                                class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-blue-400 focus:shadow-outline"
                             >
                                 <option value="" >Select </option>
                                 <option value="tm">time</option>
@@ -287,10 +335,10 @@ onMount(fetchRegisterData);
                         class="w-full bg-blue-400 text-white text-xl py-2 px-4 rounded-lg shadow-md flex items-center justify-center"
                     >
                         {#if isCreating}
-                            <!-- Center the spinner by using flex and setting it to `animate-spin` -->
+                     
                             <div class="animate-spin rounded-full h-6 w-6 border-t-4 border-white border-solid border-transparent"></div>
                         {:else}
-                            <!-- Show Submit text when isCreating is false -->
+                            
                             Submit
                         {/if}
                     </button>
@@ -307,5 +355,48 @@ onMount(fetchRegisterData);
             </div>
         </div>
     {/if}
+
+{#if showDeleteModal}
+<div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-6" transition:fade>
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-xl font-bold mb-4">Confirm Deletion</h1>
+        <p class="text-gray-700 mb-4">Are you sure you want to delete the register: <strong>{registerNameToDelete}</strong>?</p>
+        <p class="text-gray-600 mb-4">Type the user name below to confirm:</p>
+        <input
+            name="userNameInput"
+            type="text"
+            placeholder="Enter User Name"
+            class="w-full p-3 border border-gray-300 rounded-lg text-lg mb-4"
+            bind:value={registerNameInput}
+        />
+        {#if deleteErrorMessage}
+            <p class="text-red-500 mb-4">{deleteErrorMessage}</p>
+        {/if}
+        {#if responseMessage}
+            <p class="text-red-500 mb-4">{responseMessage}</p>
+        {/if}
+        <div class="flex justify-between">
+            <button
+                class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg flex items-center"
+                on:click={deleteRegister }
+                disabled={loading}
+            >
+                {#if loading}
+                    <div class="animate-spin rounded-full h-6 w-6 border-t-4 border-white border-solid border-transparent"></div>
+                {:else}
+                    Delete
+                {/if}
+            </button>
+            <button
+                class="bg-white shadow-lg text-gray-800 font-bold py-2 px-4 rounded-lg"
+                on:click={closeModal}
+            >
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+{/if}
+
 </div>
 
