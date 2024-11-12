@@ -19,7 +19,7 @@ const PerformLogin = async () => {
     try {
         const response = await fetch(adminlogin, { 
             method: "POST",
-            
+            credentials:"include", 
             body: JSON.stringify({ email, password }),
         });
 

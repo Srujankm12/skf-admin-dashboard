@@ -71,43 +71,54 @@
             registerTypeError = error;
         }
     }
-
     let createRegister = async () => {
-        try {
-            if(newregistertype == "rcp_stp"){
-                const response = await fetch(createregister+'/'+$page.params.listofdriers+'/'+$page.params.listofregisters , {
-                method:"POST",
-                body:JSON.stringify({
+    isCreating = true; 
+    try {
+        let response;
+        if (newregistertype == "rcp_stp") {
+            response = await fetch(createregister + '/' + $page.params.listofdriers + '/' + $page.params.listofregisters, {
+                method: "POST",
+                body: JSON.stringify({
                     "reg_address": newregisteradress,
-                    "reg_type": newregistertype+"_"+newrecipestepcount+"_"+newtimeortempdropdown,
-                    "label":newregisterlabel,
+                    "reg_type": newregistertype + "_" + newrecipestepcount + "_" + newtimeortempdropdown,
+                    "label": newregisterlabel,
                 })
             });
-            console.log(response);
-            }else{
-                const response = await fetch(createregister+$page.params.listofdriers+'/'+$page.params.listofregisters , {
-                method:"POST",
-                body:JSON.stringify({
+        } else {
+            response = await fetch(createregister + '/' + $page.params.listofdriers + '/' + $page.params.listofregisters, {
+                method: "POST",
+                body: JSON.stringify({
                     "reg_address": newregisteradress,
                     "reg_type": newregistertype,
-                    "label":newregisterlabel,
+                    "label": newregisterlabel,
                 })
             });
-            console.log(response);
-            }
-        } catch (error) {
-            
         }
+
+        if (response.ok) {
+            isModalOpen = false;
+            console.log("Register created successfully");
+            window.location.reload();  // Reloads the page
+        } else {
+            console.error("Failed to create register:", await response.json());
+        }
+    } catch (error) {
+        console.error("Error creating register:", error);
+    } finally {
+        isCreating = false; 
     }
+};
+
+onMount(fetchRegisterData);
+
     
     
-    // Show additional fields when 'rcp_stp' is selected
     function handleTypeChange() {
         additionalFieldVisible = newregistertype === 'rcp_stp';
     }
 
 
-    onMount(fetchRegisterData);
+   
 
     function toggleDrawer() {
         isDrawerOpen = !isDrawerOpen;
@@ -147,7 +158,7 @@
     <Drawer {isDrawerOpen} {toggleDrawer} />
 
     <div class="p-8">
-        <h3 class="text-2xl font-bold mb-6 text-center">Registers</h3>
+        <h3 class="text-2xl font-bold mb-6 text-center">.  </h3>
         {#if isLoading}
             <div class="fixed inset-0 flex items-center justify-center z-50">
                 <div class="w-16 h-16 border-6 border-t-8 border-blue-400 border-solid rounded-full animate-spin"></div>
@@ -233,6 +244,16 @@
                             {/each}
                         </select>
                     </div>
+                    <div class="mb-8">
+                        <label class="block text-black text-xl font-semibold mb-2" for="label"></label>
+                        <input
+                            id="label"
+                            type="text"
+                            bind:value={newregisterlabel}
+                            placeholder="Lable name"
+                            class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        />
+                    </div>
 
                     {#if additionalFieldVisible}
                         <div class="mb-8">
@@ -257,28 +278,22 @@
                                 <option value="tp">temperature</option>
                             </select>
                         </div>
-                        <div class="mb-8">
-                            <label class="block text-black text-xl font-semibold mb-2" for="label"></label>
-                            <input
-                                id="label"
-                                type="text"
-                                bind:value={newregisterlabel}
-                                placeholder="Lable name"
-                                class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            />
-                        </div>
+                       
                     {/if}
 
                     <div class="flex items-center justify-between mb-8">
-                        <button type="submit" 
-                        class="w-full bg-blue-500 text-white text-xl py-2 px-4 rounded-lg shadow-md"
-                        
-                        >
+                        <button
+                        type="submit"
+                        class="w-full bg-blue-400 text-white text-xl py-2 px-4 rounded-lg shadow-md flex items-center justify-center"
+                    >
                         {#if isCreating}
-                        <div class="animate-spin rounded-full h-6 w-6 border-t-4 border-white border-solid border-transparent"></div>
+                            <!-- Center the spinner by using flex and setting it to `animate-spin` -->
+                            <div class="animate-spin rounded-full h-6 w-6 border-t-4 border-white border-solid border-transparent"></div>
                         {:else}
-                          submit
-                        {/if}</button>
+                            <!-- Show Submit text when isCreating is false -->
+                            Submit
+                        {/if}
+                    </button>
                     </div>
                 </form>
 
