@@ -1,28 +1,25 @@
 <script>
     import Drawer from '$lib/Drawer.svelte';
     import { fade } from 'svelte/transition';
-    import { getregisters, getregistertypesforform ,createregistertype} from '$lib/urls';
+    import { getregisters , getregistertypesforform , createregister } from '$lib/urls';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
 
     let isLoading = false;
     let registerData;
-    let isregisternotpresent = false;
-    let responsemessage = '';
     let isCreating = false;
     let isDrawerOpen = false;
     let isModalOpen = false;
     let newregisteradress = '';
     let newregistertype = '';
-    let registertypes = [];
-    let additionalFieldVisible = false;
-    let newTextField = '';
-    let newDropdownValue = '';
     let newregisterlabel = '';
-    let complexType = '';
+    let registertypes = [];
+    let registerTypeError;
+    let additionalFieldVisible = false;
     let newrecipestepcount ='';
     let newtimeortempdropdown = '';
     let newrecipelabel = '';
+    
 
 
 
@@ -47,7 +44,6 @@
                     };
                 });
                 console.log(data);
-                isModalOpen = false;
             } else {
                 const errorData = await response.json();
                 console.error("Error fetching registers:", errorData['message']);
@@ -58,76 +54,58 @@
             isLoading = false;
         }
     };
-    
-    const AddRegister = async () => {
-        isLoading = true;
+
+    let getRegisterTypes = async () => {
         try {
-            const response = await fetch(getregistertypesforform + $page.params.listofdriers + "/" + $page.params.listofregisters, {
-                method: "GET",
+            const response = await fetch(getregistertypesforform+$page.params.listofdriers+'/'+$page.params.listofregisters , {
+                method: "GET"
             });
-            if (response.ok) {
+            if(response.ok) {
                 const data = await response.json();
+                console.log(data['reg_types']);
                 registertypes = data['reg_types'];
-                newregistertype = ''
-                console.log(registertypes);
-                isModalOpen = false;
-            } else {
-                const errorData = await response.json();
-                console.error("Error fetching registers:", errorData['message']);
+            }else{
+                registerTypeError = await response.json();
             }
         } catch (error) {
-            console.error("Error fetching registers:", error);
-        } finally {
-            isLoading = false;
+            registerTypeError = error;
         }
-    };
-    const createregistertypes = async () => {
-        isCreating = true;
+    }
+
+    let createRegister = async () => {
         try {
-            if( newregistertype === 'rcp_stp'){
-                complexType = newregistertype+"_"+newrecipestepcount+"_";
-                if( newtimeortempdropdown == 'time'){
-                    complexType = newregistertype+"_"+newrecipestepcount+"_"+"tm";
-                }
-                else{
-                    complexType = newregistertype+"_"+newrecipestepcount+"_"+"tp";
-                }
-            }
-            const response = await fetch(createregistertype +data.listofregisters, {
-                method: "POST",
-                body: JSON.stringify({ type:complexType , label: newregisterlabel }),
+            if(newregistertype == "rcp_stp"){
+                const response = await fetch(createregister+'/'+$page.params.listofdriers+'/'+$page.params.listofregisters , {
+                method:"POST",
+                body:JSON.stringify({
+                    "reg_address": newregisteradress,
+                    "reg_type": newregistertype+"_"+newrecipestepcount+"_"+newtimeortempdropdown,
+                    "label":newregisterlabel,
+                })
             });
-
-            const result = await response.json();
-            if (response.ok) {
-                isModalOpen = false;
-                newregistertype = '';
-                newregisterlabel= '';
-                responsemessage = 'register added successfully';
-                setTimeout(() => successmessage = '', 2000);
-                await createregistertypes();
-            } else {
-                responsemessage = result.message || 'Unexpected error';
+            console.log(response);
+            }else{
+                const response = await fetch(createregister+$page.params.listofdriers+'/'+$page.params.listofregisters , {
+                method:"POST",
+                body:JSON.stringify({
+                    "reg_address": newregisteradress,
+                    "reg_type": newregistertype,
+                    "label":newregisterlabel,
+                })
+            });
+            console.log(response);
             }
         } catch (error) {
-            responsemessage = 'Fetch error: ' + error;
-        } finally {
-            isCreating = false;
+            
         }
-    };
-
-   
-
+    }
+    
+    
     // Show additional fields when 'rcp_stp' is selected
     function handleTypeChange() {
         additionalFieldVisible = newregistertype === 'rcp_stp';
     }
-   
 
-   onMount(createregistertypes);
-    onMount(() => {
-        AddRegister();
-    });
 
     onMount(fetchRegisterData);
 
@@ -220,7 +198,7 @@
         {/if}
 
         <!-- svelte-ignore a11y_consider_explicit_label -->
-        <button class="w-16 h-16 bg-blue-400 fixed bottom-12 right-8 text-white text-3xl font-medium rounded-full shadow-xl flex items-center justify-center z-20" on:click={toggleModal}>
+        <button class="w-16 h-16 bg-blue-400 fixed bottom-12 right-8 text-white text-3xl font-medium rounded-full shadow-xl flex items-center justify-center z-20" on:click={() => {toggleModal();getRegisterTypes()}}>
             <i class="fas fa-plus"></i>
         </button>
     </div>
@@ -229,7 +207,7 @@
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" transition:fade>
             <div class="max-w-md w-full bg-white rounded-3xl p-6 shadow-lg relative">
                 <h3 class="text-center text-2xl py-4 mb-4 font-bold">Create New Register</h3>
-                <form on:submit|preventDefault={getregistertypesforform}>
+                <form on:submit|preventDefault={createRegister}>
                     <div class="mb-8">
                         <label class="block text-black text-xl font-semibold mb-2" for="RegisterAdress"></label>
                         <input
@@ -250,8 +228,8 @@
                             class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         > 
                             <option value="" disabled>Select a reg_type</option>
-                            {#each registertypes as reg_type}
-                                <option value={reg_type.type}>{reg_type.label}</option>
+                            {#each registertypes as rt}
+                                <option value={rt.type}>{rt.label}</option>
                             {/each}
                         </select>
                     </div>
@@ -274,9 +252,9 @@
                                 bind:value={newtimeortempdropdown}
                                 class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             >
-                                <option value="">Select </option>
-                                <option value="option1">time</option>
-                                <option value="option2">temperature</option>
+                                <option value="" >Select </option>
+                                <option value="tm">time</option>
+                                <option value="tp">temperature</option>
                             </select>
                         </div>
                         <div class="mb-8">
@@ -284,7 +262,7 @@
                             <input
                                 id="label"
                                 type="text"
-                                bind:value={newrecipelabel}
+                                bind:value={newregisterlabel}
                                 placeholder="Lable name"
                                 class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             />

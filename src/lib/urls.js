@@ -20,7 +20,7 @@ export let deletedrier = url + "/admin/delete/drier/"
 export let getdriers = url + "/admin/driers/"
 
 //register
-export let createregister = url + "/admin/create/register/"
+export let createregister = url + "/admin/create/register"
 export let deleteregister = url + "/admin/delete/register/__PLC_ID__/__DRIER_ID__/__REG_ADDRESS__/__REG_TYPE__"
 export let getregisters = url + "/admin/registers/"
 export let createregistertype = url + "/admin/create/"
