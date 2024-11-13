@@ -1,6 +1,7 @@
 <script>
     import { goto } from '$app/navigation';
     import Drawer from '$lib/Drawer.svelte';
+    import Errormessage from '../../../lib/errormessage.svelte';
     import { createplc, getplc } from '$lib/urls';
     import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
@@ -17,6 +18,8 @@
     let isDrawerOpen = false;
     let isModalOpen = false;
     let successmessage = '';
+    let errorMessage = '';
+    let showError = false;
     export let data;
 
     const fetchplc = async () => {
@@ -69,6 +72,12 @@
                 await fetchplc();
             } else {
                 responsemessage = result.message || 'Unexpected error';
+                errorMessage = responsemessage || 'An unexpected error occurred.';
+                showError = true; 
+            isLoading = false; 
+            setTimeout(() => {
+                showError = false; 
+            }, 1000); 
             }
         } catch (error) {
             responsemessage = 'Fetch error: ' + error;
@@ -194,6 +203,9 @@
 
 {#if successmessage}
         <Successmessage successMessage={successmessage} />
+    {/if}
+    {#if showError}
+        <Errormessage errorMessage={errorMessage} />
     {/if}
 </div>
 

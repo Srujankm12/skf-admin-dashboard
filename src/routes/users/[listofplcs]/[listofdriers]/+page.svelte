@@ -3,6 +3,8 @@
     import Drawer from '$lib/Drawer.svelte';
     import { fade } from 'svelte/transition';
     import { getdriers , createdrier} from '$lib/urls';
+    import Errormessage from '../../../../lib/errormessage.svelte';
+    import Successmessage from '$lib/successmessage.svelte';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
 
@@ -16,6 +18,8 @@
     let isDrawerOpen = false;
     let isModalOpen = false;
     let successmessage = '';
+    let errorMessage = '';
+    let showError = false;
     export let data;
 
     const fetchdrier = async () => {
@@ -29,13 +33,13 @@
             const data = await response.json();
             console.log(data);
 
-            // Process the drier list to capitalize only the first letter of each label
+            
             drierlist = data.driers.map(drier => ({
                 ...drier,
                 label: `${drier.label[0].toUpperCase()}${drier.label.slice(1).toLowerCase()}`
             }));
 
-            nodrierAvailable = drierlist.length === 0; // Check if no driers are available
+            nodrierAvailable = drierlist.length === 0; 
             isModalOpen = false;
         } else {
             const errorData = await response.json();
@@ -62,10 +66,17 @@
                 createdrierID = '';
                 newdrierlabel = '';
                 responsemessage = 'Drier added successfully';
+                successmessage = responsemessage;
                 setTimeout(() => successmessage = '', 2000);
                 await fetchdrier();
             } else {
                 responsemessage = result.message || 'Unexpected error';
+                errorMessage = responsemessage || 'An unexpected error occurred.';
+                showError = true;
+                isLoading = false; 
+            setTimeout(() => {
+                showError = false; 
+            }, 1000);
             }
         } catch (error) {
             responsemessage = 'Fetch error: ' + error;
@@ -177,6 +188,12 @@
                 </button>
             </div>
         </div>
+    {/if}
+    {#if successmessage}
+        <Successmessage successMessage={successmessage} />
+    {/if}
+    {#if showError}
+        <Errormessage errorMessage={errorMessage} />
     {/if}
 </div>
 

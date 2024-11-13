@@ -2,6 +2,7 @@
     import { goto } from '$app/navigation';
     import Drawer from '$lib/Drawer.svelte';
     import Successmessage from '$lib/successmessage.svelte';
+   import Errormessage from '../../lib/errormessage.svelte';
     import { createuser, getusers } from '$lib/urls';
     import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
@@ -16,6 +17,8 @@
     let noUsersAvailable = false;
     let isDrawerOpen = false;
     let isModalOpen = false;
+    let errorMessage = '';
+    let showError = false;
 
     const fetchUsers = async () => {
         isLoading = true;
@@ -68,6 +71,13 @@
                 await fetchUsers();
             } else {
                 const errorData = await response.json();
+                errorMessage = errorData["message"]|| 'An unexpected error occurred.';
+                console.error("Error creating user:", errorData["message"]);
+                showError = true; 
+            isLoading = false; 
+            setTimeout(() => {
+                showError = false; 
+            }, 1000); 
                 console.error("Error creating user:", errorData["message"]);
             }
         } catch (error) {
@@ -203,6 +213,9 @@
 
     {#if sucessmessage}
         <Successmessage successMessage={sucessmessage} />
+    {/if}
+    {#if showError}
+        <Errormessage errorMessage={errorMessage} />
     {/if}
 </div>
 

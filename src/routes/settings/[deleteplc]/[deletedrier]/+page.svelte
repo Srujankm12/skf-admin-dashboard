@@ -1,6 +1,7 @@
 <script>
     import { getdriers, deletedrier } from '$lib/urls';
     import { onMount } from 'svelte';
+    import Errormessage from "$lib/errormessage.svelte";
     import Drawer from '$lib/Drawer.svelte';
     import { fade } from 'svelte/transition';
     import { page } from '$app/stores';
@@ -15,6 +16,8 @@
     let drierNameInput = '';
     let responseMessage = '';
     let loading =false;
+    let errorMessage ='';
+    let showError = false;
     export let data;
 
     const fetchdrier = async () => {
@@ -36,10 +39,18 @@
                 isLoading = false;
             } else {
                 const errorData = await response.json();
+                errorMessage = response.message || 'Error fetching driers.';
                 console.error('Error fetching driers:', errorData.message);
                 isLoading = false;
+                showError = true; 
+            loading = false; 
+            setTimeout(() => {
+                showError = false; 
+            }, 1000); 
+        
             }
         } catch (error) {
+            errorMessage = error
             console.error('Error fetching driers:', error);
             isLoading = false;
         }
@@ -150,7 +161,7 @@
                 name="drierNameInput"
                 type="text"
                 placeholder="Enter Drier Name"
-                class="w-full p-3 border border-gray-300 rounded-lg text-lg mb-4"
+                class="w-full p-3 border border-gray-300 focus:outline-blue-400 rounded-lg text-lg mb-4"
                 bind:value={drierNameInput}
             />
             {#if deleteErrorMessage}

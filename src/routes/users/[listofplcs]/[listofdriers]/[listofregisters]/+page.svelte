@@ -4,6 +4,8 @@
     import { getregisters , getregistertypesforform , createregister , deleteregister } from '$lib/urls';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
+    import Errormessage from '../../../../../lib/errormessage.svelte';
+    import Successmessage from '$lib/successmessage.svelte';
 
     let isLoading = false;
     let registerData;
@@ -27,6 +29,11 @@
     let registerTypeToDelete = '';
     let responseMessage = '';
     let loading = false;
+    let showError = false;
+    let errorMessage = '';
+    let successmessage = '';
+    let responsemessage = '';
+   
 
     export let data;
 
@@ -95,6 +102,7 @@
                         "reg_address": newregisteradress,
                         "reg_type": newregistertype + "_" + newrecipestepcount + "_" + newtimeortempdropdown,
                         "label": newregisterlabel,
+                      
                     })
                 });
             } else {
@@ -104,6 +112,7 @@
                         "reg_address": newregisteradress,
                         "reg_type": newregistertype,
                         "label": newregisterlabel,
+                        
                     })
                 });
             }
@@ -111,9 +120,19 @@
             if (response.ok) {
                 isModalOpen = false;
                 console.log("Register created successfully");
+                successmessage = "Register created successfully",
+                setTimeout(() => successmessage = '', 3000);
                 window.location.reload(); 
             } else {
                 console.error("Failed to create register:", await response.json());
+                responsemessage = result.message || 'Unexpected error';
+                errorMessage = responsemessage || 'An unexpected error occurred.';
+                errorMessage = message.error|| 'An unexpected error occurred.';
+                showError = true;
+                isLoading = false; 
+            setTimeout(() => {
+                showError = false; 
+            }, 1000);
             }
         } catch (error) {
             console.error("Error creating register:", error);
@@ -134,6 +153,7 @@
                 deleteregister +  $page.params.listofdriers + '/' + $page.params.listofregisters + '/'+registerAdressToDelete +'/'+registerTypeToDelete ,
                 {
                     method: "GET",
+                   
                 }
             );
             const result = await response.json();
@@ -181,7 +201,7 @@
     function toggleModal() {
         isModalOpen = !isModalOpen;
     }
-
+  
     function formatTimestamp(timestamp) {
         const date = new Date(timestamp);
         const day = String(date.getUTCDate()).padStart(2, '0');
@@ -340,6 +360,7 @@
                         <button
                         type="submit"
                         class="w-full bg-blue-400 text-white text-xl py-2 px-4 rounded-lg shadow-md flex items-center justify-center"
+                        
                     >
                         {#if isCreating}
                      
@@ -373,7 +394,7 @@
             name="userNameInput"
             type="text"
             placeholder="Enter User Name"
-            class="w-full p-3 border border-gray-300 rounded-lg text-lg mb-4"
+            class="w-full p-3 border border-gray-300 focus:outline-blue-400 rounded-lg text-lg mb-4"
             bind:value={registerNameInput}
         />
         {#if deleteErrorMessage}
@@ -403,6 +424,12 @@
         </div>
     </div>
 </div>
+{/if}
+{#if successmessage}
+<Successmessage successMessage={successmessage} />
+{/if}
+{#if showError}
+<Errormessage errorMessage={errorMessage} />
 {/if}
 
 </div>

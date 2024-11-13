@@ -2,6 +2,7 @@
     import { getusers, deleteuser } from '$lib/urls'; // Ensure correct imports
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
+    import Errormessage from "$lib/errormessage.svelte";
     import Drawer from '$lib/Drawer.svelte';
     import { fade } from 'svelte/transition';
 
@@ -14,9 +15,9 @@
     let userNameToDelete = '';
     let deleteErrorMessage = '';
     let responseMessage = '';
-    let loading = false; // Variable to control button loading state
+    let loading = false; 
+    let errormessage = '';
 
-    // Fetch Users
     const fetchUsers = async () => {
         isLoading = true;
         try {
@@ -35,6 +36,7 @@
                 isLoading = false;
             } else {
                 const errorData = await response.json();
+
                 console.error("Error fetching users:", errorData['message']);
                 isLoading = false;
             }
@@ -162,7 +164,7 @@
             name="userNameInput"
             type="text"
             placeholder="Enter User Name"
-            class="w-full p-3 border border-gray-300 rounded-lg text-lg mb-4"
+            class="w-full p-3 border border-gray-300 rounded-lg text-lg mb-4 focus:outline-blue-400"
             bind:value={userNameInput}
         />
         {#if deleteErrorMessage}

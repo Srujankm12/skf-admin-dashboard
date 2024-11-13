@@ -162,7 +162,7 @@
             name="plcNameInput"
             type="text"
             placeholder="Enter PLC Name"
-            class="w-full p-3 border border-gray-300 rounded-lg text-lg mb-4"
+            class="w-full p-3 border border-gray-300 focus:outline-blue-400 rounded-lg text-lg mb-4"
             bind:value={plcNameInput}
         />
         {#if deleteErrorMessage}
