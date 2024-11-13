@@ -366,7 +366,7 @@
                                 <option value="" >Select </option>
                                 <option value="st">Step indicator</option>
                                 <option value="stm">Set time</option>
-                                <option value="rtm">Real time temperature</option>
+                                <option value="rtm">Real time time</option>
                                 <option value="rtp">Real time temperature</option>
                             </select>
                         </div>
