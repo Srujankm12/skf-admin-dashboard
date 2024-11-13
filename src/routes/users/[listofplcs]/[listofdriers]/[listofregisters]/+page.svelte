@@ -118,28 +118,38 @@
                 });
             }
             const result = await response.json();
-            if (response.ok) {
-                isModalOpen = false;
-                console.log("Register created successfully");
-                successmessage = "Register created successfully",
-                setTimeout(() => successmessage = '', 3000);
-                window.location.reload(); 
-            } else {
-                console.error("Failed to create register:");
-                responsemessage = result.message || 'Unexpected error';
-                errorMessage = responsemessage || 'An unexpected error occurred.';
-                errorMessage = message.error|| 'An unexpected error occurred.';
-                showError = true;
-                isLoading = false; 
-            setTimeout(() => {
-                showError = false; 
-            }, 3000);
-            }
-        } catch (error) {
-            console.error("Error creating register:", error);
-        } finally {
-            isCreating = false; 
-        }
+if (response.ok) {
+    // Success handling
+    isModalOpen = false;
+    console.log("Register created successfully");
+    successmessage = "Register created successfully";
+    setTimeout(() => successmessage = '', 3000);
+    window.location.reload(); 
+} else {
+    // Error handling
+    console.error("Failed to create register:", result.message);
+    const responseMessage = result.message || 'Unexpected error';
+    errorMessage = responseMessage; // Assign error message once
+    showError = true;  // Show error message
+    isLoading = false;
+    setTimeout(() => {
+        showError = false;  // Hide error message after 3 seconds
+    }, 3000);
+}
+
+} catch (error) {
+    // Catch any other errors (network or unexpected errors)
+    console.error("Error creating register:", error);
+    errorMessage = 'Fetch error: ' + error.message || 'An unexpected error occurred.';
+    showError = true;  // Show error message
+    setTimeout(() => {
+        showError = false;  // Hide error message after 3 seconds
+    }, 3000);
+} finally {
+    // Reset the creating state
+    isCreating = false;
+}
+
     };
 
 
@@ -166,6 +176,8 @@
                 await fetchRegisterData();
             } else {
                 responseMessage = result.message || 'Unexpected error';
+                showDeleteModal = true;
+
             }
         } catch (error) {
             responseMessage = 'Fetch error: ' + error.message;
