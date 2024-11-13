@@ -33,6 +33,7 @@
     let errorMessage = '';
     let successmessage = '';
     let responsemessage = '';
+
    
 
     export let data;
@@ -116,7 +117,7 @@
                     })
                 });
             }
-
+            const result = await response.json();
             if (response.ok) {
                 isModalOpen = false;
                 console.log("Register created successfully");
@@ -124,7 +125,7 @@
                 setTimeout(() => successmessage = '', 3000);
                 window.location.reload(); 
             } else {
-                console.error("Failed to create register:", await response.json());
+                console.error("Failed to create register:");
                 responsemessage = result.message || 'Unexpected error';
                 errorMessage = responsemessage || 'An unexpected error occurred.';
                 errorMessage = message.error|| 'An unexpected error occurred.';
@@ -132,7 +133,7 @@
                 isLoading = false; 
             setTimeout(() => {
                 showError = false; 
-            }, 1000);
+            }, 3000);
             }
         } catch (error) {
             console.error("Error creating register:", error);
@@ -145,7 +146,7 @@
     const deleteRegister = async () => {
         if (registerNameInput !== registerNameToDelete) {
             deleteErrorMessage = 'Register name does not match. Please enter the correct name.';
-            return;
+          
         }
         loading = true;
         try {
@@ -201,26 +202,40 @@
     function toggleModal() {
         isModalOpen = !isModalOpen;
     }
-  
     function formatTimestamp(timestamp) {
-        const date = new Date(timestamp);
-        const day = String(date.getUTCDate()).padStart(2, '0');
-        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-        const year = date.getUTCFullYear();
+    const date = new Date(timestamp);
 
-        let hours = date.getUTCHours();
-        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-        const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+    // Use `Intl.DateTimeFormat` to format the date in Bengaluru's time zone (IST, UTC+5:30)
+    const options = {
+        timeZone: 'Asia/Kolkata', // Bengaluru's time zone
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true // 12-hour format (AM/PM)
+    };
 
-        const period = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12;
+    const formatter = new Intl.DateTimeFormat('en-IN', options);
+    const formattedDate = formatter.format(date);
 
-        const formattedDate = `${day}/${month}/${year}`;
-        const formattedTime = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${period}`;
+    // Split the formatted string to extract date and time components
+    const dateTimeParts = formattedDate.split(/[\s/:]+/);
 
-        return { date: formattedDate, time: formattedTime };
-    }
+    // Extract individual components
+    const [day, month, year, hour, minute, second, period] = dateTimeParts;
+
+    // Format date as DD/MM/YYYY without any commas
+    const formattedDateStr = `${day}/${month}/${year}`;
+    const formattedTimeStr = `${hour}:${minute}:${second} ${period.toUpperCase()}`;
+
+    return { date: formattedDateStr, time: formattedTimeStr };
+}
+
+
+
+
 </script>
 
 <div class="relative h-screen bg-white text-black">
@@ -349,8 +364,10 @@
                                 class="shadow border rounded-lg w-full py-2 px-4 text-gray-700 leading-tight focus:outline-blue-400 focus:shadow-outline"
                             >
                                 <option value="" >Select </option>
-                                <option value="tm">time</option>
-                                <option value="tp">temperature</option>
+                                <option value="st">Step indicator</option>
+                                <option value="stm">Set time</option>
+                                <option value="rtm">Real time temperature</option>
+                                <option value="rtp">Real time temperature</option>
                             </select>
                         </div>
                        
