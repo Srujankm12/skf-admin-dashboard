@@ -36,7 +36,6 @@
 
    
 
-    export let data;
 
     function capitalizeFirstLetter(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
@@ -242,7 +241,7 @@ if (response.ok) {
     const formattedDateStr = `${day}/${month}/${year}`;
     const formattedTimeStr = `${hour}:${minute}:${second} ${period.toUpperCase()}`;
 
-    return { date: formattedDateStr, time: formattedTimeStr };
+    return { date: formattedDateStr,  time: formattedTimeStr,};
 }
 
 
@@ -290,7 +289,7 @@ if (response.ok) {
                                     {formatTimestamp(register.last_update_timestamp).date}
                                 {/if}
                             </td>
-
+                            
                             <td class="py-4 px-6 text-center">
                                 {#if register.last_update_timestamp}
                                     {formatTimestamp(register.last_update_timestamp).time}
